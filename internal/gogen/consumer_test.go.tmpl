@@ -1,0 +1,92 @@
+package consumer_test
+
+import (
+    "encoding/hex"
+    "math"
+    "strings"
+    "testing"
+    "time"
+
+    "example.com/consumer/generated/avoar/core/opendata/business"
+    "example.com/consumer/generated/avoar/core/opendata/common"
+    "example.com/consumer/generated/avoar/core/opendata/election"
+    "example.com/consumer/generated/avoar/core/opendata/mandate"
+    "example.com/consumer/generated/avoar/core/opendata/municipality"
+    "example.com/consumer/generated/avoar/core/opendata/pleito"
+    "example.com/consumer/generated/avoar/core/opendata/public_people"
+    "example.com/consumer/generated/avoar/core/opendata/voting_location"
+    "example.com/consumer/generated/avoar/core/validation"
+    "google.golang.org/protobuf/proto"
+    "google.golang.org/protobuf/types/known/timestamppb"
+)
+
+func TestPythonBinaryRoundtrip(t *testing.T) {
+    // Serialized by Python with uint64 max, an exact decimal, and explicit zero.
+    const pythonHex = "08ffffffffffffffffff01120830303132333435361a0541766f61722001280132200a1e31323334353637383930313233343536373839302e3132333435363738393800"
+    data, err := hex.DecodeString(pythonHex)
+    if err != nil { t.Fatal(err) }
+    company := new(business.Empresa)
+    if err := proto.Unmarshal(data, company); err != nil { t.Fatal(err) }
+    if err := validation.Validate(company); err != nil { t.Fatal(err) }
+    if company.GetId() != ^uint64(0) || company.GetCapitalSocial().GetValue() != "12345678901234567890.123456789" || company.Porte == nil {
+        t.Fatal("lost precision or presence", company)
+    }
+    roundtrip, err := (proto.MarshalOptions{Deterministic:true}).Marshal(company)
+    if err != nil || hex.EncodeToString(roundtrip) != pythonHex { t.Fatal("binary roundtrip changed", err) }
+    company.Id = nil
+    if err := validation.Validate(company); err == nil || !strings.Contains(err.Error(), "Empresa.id") { t.Fatal("missing required ID", err) }
+    company.Id = proto.Uint64(0)
+    if err := validation.Validate(company); err != nil { t.Fatal(err) }
+}
+
+func TestValidation(t *testing.T) {
+    latitude, _ := validation.DecimalValue("-23.550520")
+    longitude, _ := validation.DecimalValue("-46.633308")
+    city := &municipality.Municipio{CodigoIbge:proto.String("3550308"), Nome:proto.String("São Paulo"), NomeNormalizado:proto.String("sao paulo"), Uf:proto.String("SP"), Latitude:latitude, Longitude:longitude}
+    if err := validation.Validate(city); err != nil { t.Fatal(err) }
+    city.Latitude, _ = validation.DecimalValue("90.0000000000000000001")
+    if err := validation.Validate(city); err == nil { t.Fatal("accepted latitude above maximum") }
+    city.Latitude, _ = validation.DecimalValue("90")
+    city.Longitude, _ = validation.DecimalValue("-180")
+    if err := validation.Validate(city); err != nil { t.Fatal(err) }
+    for _, invalid := range []string{"NaN", "Infinity", "1_000", "", "1,23"} {
+        if _, err := validation.DecimalValue(invalid); err == nil { t.Fatal("accepted invalid decimal", invalid) }
+    }
+    birthday, err := validation.DateValue(2024,time.February,29)
+    if err != nil { t.Fatal(err) }
+    birthday.Year=proto.Uint32(2023)
+    if err := validation.Validate(birthday); err == nil { t.Fatal("accepted invalid leap date") }
+    if _, err := validation.DateValue(2024,time.Month(0),1); err == nil { t.Fatal("accepted invalid month") }
+    instant, err := validation.TimestampValue(time.Date(2026,11,7,12,30,0,0,time.UTC))
+    if err != nil || instant.GetSeconds() == 0 { t.Fatal("timestamp conversion", err) }
+    if err := validation.Validate(&timestamppb.Timestamp{Nanos:1_000_000_000}); err == nil { t.Fatal("accepted invalid timestamp") }
+    var nilCompany *business.Empresa
+    if err := validation.Validate(nilCompany); err == nil { t.Fatal("accepted nil") }
+}
+
+func TestOptionalValuesAndCrossDomainEnums(t *testing.T) {
+    date, _ := validation.DateValue(2026,time.October,4)
+    ordinary := election.TipoEleicao_TIPO_ELEICAO_ORDINARIA
+    value := &pleito.Pleito{Id:proto.Uint64(0), Ano:proto.Int64(2026), Tipo:&ordinary, DataInicio:date}
+    if err := validation.Validate(value); err != nil { t.Fatal(err) }
+    unknown := election.TipoEleicao(999)
+    value.Tipo = &unknown
+    if err := validation.Validate(value); err == nil { t.Fatal("accepted unknown enum") }
+    unspecified := election.TipoEleicao(0)
+    value.Tipo = &unspecified
+    if err := validation.Validate(value); err == nil { t.Fatal("accepted unspecified enum") }
+    office := &mandate.GabineteMandato{MandatoId:proto.Uint64(0)}
+    if office.Telefones != nil { t.Fatal("expected absent list") }
+    office.Telefones=&common.StringList{}
+    data, err := proto.Marshal(office)
+    if err != nil { t.Fatal(err) }
+    copy := new(mandate.GabineteMandato)
+    if err := proto.Unmarshal(data,copy); err != nil || copy.Telefones == nil { t.Fatal("lost empty list presence", err) }
+    person:= &public_people.PessoaPublica{Id:proto.Uint64(0), Nome:proto.String("Ana"), NomeCompleto:proto.String("Ana Silva"), Genero:proto.String("X")}
+    if err := validation.Validate(person); err == nil { t.Fatal("accepted invalid literal") }
+    location:= &voting_location.LocalVotacao{Id:proto.Uint64(0), Uf:proto.String("SP"), CodigoMunicipioTse:proto.String("1"), ZonaEleitoral:proto.String("1"), Numero:proto.String("1"), AnoReferencia:proto.Int64(2026), DataEleicao:date, NumeroTurno:proto.Int64(1)}
+    for _, invalid := range []float64{math.NaN(),math.Inf(1),-91} {
+        location.LatitudeTse=proto.Float64(invalid)
+        if err := validation.Validate(location); err == nil { t.Fatal("accepted invalid float coordinate") }
+    }
+}

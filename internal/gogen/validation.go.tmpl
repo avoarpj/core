@@ -1,0 +1,138 @@
+// Package validation validates Avoar contracts and provides lossless type conversions.
+package validation
+
+import (
+	"fmt"
+	"math"
+	"math/big"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
+	common "{{IMPORT_PREFIX}}/avoar/core/opendata/common"
+	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/types/descriptorpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
+
+var decimalPattern = regexp.MustCompile(`^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$`)
+
+func decimal(text string) (*big.Rat, error) {
+	if !decimalPattern.MatchString(text) { return nil, fmt.Errorf("expected a finite base-10 decimal string") }
+	value, ok := new(big.Rat).SetString(text)
+	if !ok { return nil, fmt.Errorf("invalid decimal %q", text) }
+	return value, nil
+}
+
+// DecimalValue preserves the supplied decimal string, including trailing zeros.
+func DecimalValue(text string) (*common.Decimal, error) {
+	if _, err := decimal(text); err != nil { return nil, err }
+	return &common.Decimal{Value: proto.String(text)}, nil
+}
+
+// DateValue constructs a civil calendar date, without a time or timezone.
+func DateValue(year int, month time.Month, day int) (*common.Date, error) {
+	if year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31 {
+		return nil, fmt.Errorf("invalid calendar date")
+	}
+	value := &common.Date{Year: proto.Uint32(uint32(year)), Month: proto.Uint32(uint32(month)), Day: proto.Uint32(uint32(day))}
+	if err := Validate(value); err != nil { return nil, err }
+	return value, nil
+}
+
+// TimestampValue constructs an instant from Go's timezone-aware time.Time.
+func TimestampValue(value time.Time) (*timestamppb.Timestamp, error) {
+	message := timestamppb.New(value)
+	if err := message.CheckValid(); err != nil { return nil, err }
+	return message, nil
+}
+
+// Validate applies the rules declared in the schemas. Call explicitly after
+// construction or deserialization and before publishing a message.
+func Validate(message proto.Message) error {
+	if message == nil || !message.ProtoReflect().IsValid() { return fmt.Errorf("expected a non-nil Protobuf message") }
+	return validate(message.ProtoReflect(), string(message.ProtoReflect().Descriptor().Name()))
+}
+
+func validate(message protoreflect.Message, location string) error {
+	fields := message.Descriptor().Fields()
+	for index := 0; index < fields.Len(); index++ {
+		field := fields.Get(index)
+		fieldPath := location + "." + string(field.Name())
+		var rules *common.FieldRules
+		if options, ok := field.Options().(*descriptorpb.FieldOptions); ok && proto.HasExtension(options, common.E_Rules) {
+			rules = proto.GetExtension(options, common.E_Rules).(*common.FieldRules)
+		}
+		if field.HasPresence() && !message.Has(field) {
+			if rules.GetRequired() { return fmt.Errorf("%s: required field is absent", fieldPath) }
+			continue
+		}
+		value := message.Get(field)
+		if field.IsList() {
+			list := value.List()
+			for item := 0; item < list.Len(); item++ {
+				if err := validateField(field, list.Get(item), rules, fmt.Sprintf("%s[%d]", fieldPath, item)); err != nil { return err }
+			}
+		} else {
+			if err := validateField(field, value, rules, fieldPath); err != nil { return err }
+		}
+	}
+	switch message.Descriptor().FullName() {
+	case "avoar.core.opendata.common.Decimal":
+		if _, err := decimal(message.Get(fields.ByName("value")).String()); err != nil { return fmt.Errorf("%s: %w", location, err) }
+	case "avoar.core.opendata.common.Date":
+		year := int(message.Get(fields.ByName("year")).Uint())
+		month := time.Month(message.Get(fields.ByName("month")).Uint())
+		day := int(message.Get(fields.ByName("day")).Uint())
+		value := time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+		if value.Year() != year || value.Month() != month || value.Day() != day { return fmt.Errorf("%s: invalid calendar date", location) }
+	case "google.protobuf.Timestamp":
+		value := &timestamppb.Timestamp{Seconds: message.Get(fields.ByName("seconds")).Int(), Nanos: int32(message.Get(fields.ByName("nanos")).Int())}
+		if err := value.CheckValid(); err != nil { return fmt.Errorf("%s: %w", location, err) }
+	}
+	return nil
+}
+
+func validateField(field protoreflect.FieldDescriptor, value protoreflect.Value, rules *common.FieldRules, location string) error {
+	if field.Kind() == protoreflect.MessageKind {
+		if err := validate(value.Message(), location); err != nil { return err }
+	}
+	if field.Kind() == protoreflect.EnumKind {
+		entry := field.Enum().Values().ByNumber(value.Enum())
+		if entry == nil || strings.HasSuffix(string(entry.Name()), "_UNSPECIFIED") { return fmt.Errorf("%s: unknown or unspecified enum value %d", location, value.Enum()) }
+	}
+	if len(rules.GetAllowedValues()) > 0 {
+		allowed := false
+		for _, candidate := range rules.GetAllowedValues() { if value.String() == candidate { allowed = true; break } }
+		if !allowed { return fmt.Errorf("%s: expected one of %v", location, rules.GetAllowedValues()) }
+	}
+	if rules == nil || (rules.Minimum == nil && rules.Maximum == nil) { return nil }
+	var text string
+	switch field.Kind() {
+	case protoreflect.MessageKind:
+		text = value.Message().Get(value.Message().Descriptor().Fields().ByName("value")).String()
+	case protoreflect.FloatKind, protoreflect.DoubleKind:
+		number := value.Float()
+		if math.IsNaN(number) || math.IsInf(number, 0) { return fmt.Errorf("%s: expected a finite number", location) }
+		text = strconv.FormatFloat(number, 'g', -1, 64)
+	case protoreflect.Uint32Kind, protoreflect.Uint64Kind, protoreflect.Fixed32Kind, protoreflect.Fixed64Kind:
+		text = strconv.FormatUint(value.Uint(), 10)
+	default:
+		text = strconv.FormatInt(value.Int(), 10)
+	}
+	number, err := decimal(text)
+	if err != nil { return fmt.Errorf("%s: %w", location, err) }
+	if rules.Minimum != nil {
+		limit, err := decimal(rules.GetMinimum())
+		if err != nil { return fmt.Errorf("%s: invalid minimum: %w", location, err) }
+		if number.Cmp(limit) < 0 { return fmt.Errorf("%s: below minimum %s", location, rules.GetMinimum()) }
+	}
+	if rules.Maximum != nil {
+		limit, err := decimal(rules.GetMaximum())
+		if err != nil { return fmt.Errorf("%s: invalid maximum: %w", location, err) }
+		if number.Cmp(limit) > 0 { return fmt.Errorf("%s: above maximum %s", location, rules.GetMaximum()) }
+	}
+	return nil
+}
