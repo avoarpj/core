@@ -1,0 +1,56 @@
+// Basic data contracts for evm; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.evm;
+
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+enum TipoItemBoletim {
+  TIPO_ITEM_BOLETIM_UNSPECIFIED = 0;
+  TIPO_ITEM_BOLETIM_NOMINAL = 1;
+  TIPO_ITEM_BOLETIM_LEGENDA = 2;
+  TIPO_ITEM_BOLETIM_BRANCO = 3;
+  TIPO_ITEM_BOLETIM_NULO = 4;
+  TIPO_ITEM_BOLETIM_ANULADO = 5;
+  TIPO_ITEM_BOLETIM_ANULADO_JUDICIALMENTE = 6;
+}
+
+message UrnaEletronica {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 numero_serie_urna = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome_simbolico = 3;
+}
+
+message BoletimUrna {
+  optional string codigo_municipio_ibge = 1;
+  optional uint64 id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 urna_id = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_abertura = 4;
+  google.protobuf.Timestamp data_encerramento = 5;
+  google.protobuf.Timestamp data_emissao = 6;
+  google.protobuf.Timestamp data_recebimento = 7;
+  optional string zona_eleitoral = 8 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string secao_eleitoral = 9 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string local_votacao = 10 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 qtd_eleitores_aptos = 11 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 qtd_comparecimento = 12 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 qtd_abstencoes = 13 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string hash_flashcard = 14;
+  optional string hash_dados_carga_1 = 15 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string hash_dados_carga_2 = 16 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+message ItemBoletimUrna {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 boletim_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.evm.TipoItemBoletim tipo = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string valor = 4;
+  optional int64 quantidade = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 eleicao_id = 6;
+  optional uint64 turno_eleicao_id = 7;
+  optional string codigo_local = 8;
+  optional int64 codigo_cargo_tse = 9 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 candidatura_id = 10;
+}

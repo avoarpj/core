@@ -1,0 +1,67 @@
+// Basic data contracts for ceap; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.ceap;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+import "avoar/core/opendata/suppliers/domain.proto";
+import "google/protobuf/timestamp.proto";
+
+enum CategoriaCEAP {
+  CATEGORIA_CEAP_NAO_CLASSIFICADA = 0;
+  CATEGORIA_CEAP_MANUTENCAO_ESCRITORIO = 1;
+  CATEGORIA_CEAP_HOSPEDAGEM_ALIMENTACAO_LOCOMOCAO = 2; // alimentação, hospedagem e locomoção
+  CATEGORIA_CEAP_COMBUSTIVEL_LUBRIFICANTE = 3;
+  CATEGORIA_CEAP_CONSULTORIA = 4;
+  CATEGORIA_CEAP_PUBLICIDADE = 5;
+  CATEGORIA_CEAP_MATERIAL_EXPEDIENTE = 6;
+  CATEGORIA_CEAP_SOFTWARE = 7;
+  CATEGORIA_CEAP_SERVICO_SEGURANCA = 8;
+  CATEGORIA_CEAP_PASSAGEM_AEREA = 9;
+  CATEGORIA_CEAP_TELEFONIA = 10;
+  CATEGORIA_CEAP_SERVICOS_POSTAIS = 11;
+  CATEGORIA_CEAP_ASSINATURA_PUBLICACOES = 12;
+  CATEGORIA_CEAP_ALIMENTACAO = 13;
+  CATEGORIA_CEAP_HOSPEDAGEM = 14; // exceto Distrito Federal
+  CATEGORIA_CEAP_LOCACAO_VEICULOS = 15;
+  CATEGORIA_CEAP_TAXI_PEDAGIO_ESTACIONAMENTO = 16;
+  CATEGORIA_CEAP_PASSAGEM_TERRESTRE_MARITIMA = 17;
+  CATEGORIA_CEAP_PARTICIPACAO_PALESTRA = 18;
+}
+
+enum SubcategoriaCEAP {
+  SUBCATEGORIA_CEAP_SEM_SUBCATEGORIA = 0;
+  SUBCATEGORIA_CEAP_COMBUSTIVEL_VEICULOS_AUTOMOTORES = 1; // subcategorias para combustível
+  SUBCATEGORIA_CEAP_COMBUSTIVEL_EMBARCACOES = 2;
+  SUBCATEGORIA_CEAP_COMBUSTIVEL_AERONAVES = 3;
+  SUBCATEGORIA_CEAP_COMBUSTIVEL_NAO_ESPECIFICADO = 4; // sem especificação
+  SUBCATEGORIA_CEAP_PASSAGEM_AEREA_SIGEPA = 5; // subcategorias para passagem aérea
+  SUBCATEGORIA_CEAP_PASSAGEM_AEREA_RPA = 6;
+  SUBCATEGORIA_CEAP_REEMBOLSO_PASSAGEM_AEREA = 7;
+  SUBCATEGORIA_CEAP_LOCACAO_VEICULO_AUTOMOTOR = 8; // subcategorias para locação de veículos
+  SUBCATEGORIA_CEAP_LOCACAO_AERONAVE = 9;
+  SUBCATEGORIA_CEAP_LOCACAO_EMBARCACAO = 10;
+}
+
+message ReembolsoCeap {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 mandato_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.ceap.CategoriaCEAP categoria = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.ceap.SubcategoriaCEAP subcategoria = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string descricao_especificacao = 5;
+  optional uint64 fornecedor_id = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.suppliers.TipoDocumentoFornecedor tipo_documento_fornecedor = 7 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Decimal valor_glosa = 8 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Decimal valor_documento = 9 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Decimal valor_liquido = 10 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_emissao = 11;
+}
+
+message ComprovanteReembolsoCeap {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string fonte = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string descricao_adicional = 3;
+  optional uint64 ceap_id = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+}

@@ -1,0 +1,23 @@
+// Shared lossless types. IDs use uint64 directly; Protobuf has no scalar aliases.
+syntax = "proto3";
+
+package avoar.core.opendata.common;
+
+import "avoar/core/opendata/common/options.proto";
+
+// Finite base-10 value, e.g. "1234.50". Never convert through a binary float.
+message Decimal {
+  optional string value = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+// Civil calendar date, with no time or timezone.
+message Date {
+  optional uint32 year = 1 [(avoar.core.opendata.common.rules) = { required: true minimum: "1" maximum: "9999" }];
+  optional uint32 month = 2 [(avoar.core.opendata.common.rules) = { required: true minimum: "1" maximum: "12" }];
+  optional uint32 day = 3 [(avoar.core.opendata.common.rules) = { required: true minimum: "1" maximum: "31" }];
+}
+
+// Distinguishes an absent list from a present, empty list.
+message StringList {
+  repeated string values = 1;
+}

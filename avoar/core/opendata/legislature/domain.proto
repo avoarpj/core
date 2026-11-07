@@ -1,0 +1,15 @@
+// Basic data contracts for legislature; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.legislature;
+
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+message Legislatura {
+  optional int64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_inicio = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_fim = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string orgao_id = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+}

@@ -1,0 +1,79 @@
+// Basic data contracts for amendment; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.amendment;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+enum TipoAutoria {
+  TIPO_AUTORIA_UNSPECIFIED = 0;
+  TIPO_AUTORIA_INDIVIDUAL_COM_FINALIDADE = 1;
+  TIPO_AUTORIA_INDIVIDUAL_ESPECIAL = 2;
+  TIPO_AUTORIA_RELATOR = 3; // relator
+  TIPO_AUTORIA_BANCADA = 4; // bancada
+  TIPO_AUTORIA_COMISSAO = 5; // comissão
+}
+
+enum Localidade {
+  LOCALIDADE_UNSPECIFIED = 0;
+  LOCALIDADE_MUNICIPAL = 1;
+  LOCALIDADE_ESTADUAL = 2; // estadual
+  LOCALIDADE_NACIONAL = 3;
+}
+
+enum TipoItem {
+  TIPO_ITEM_UNSPECIFIED = 0;
+  TIPO_ITEM_FUNCAO = 1;
+  TIPO_ITEM_SUBFUNCAO = 2;
+  TIPO_ITEM_PROGRAMA = 3;
+  TIPO_ITEM_ACAO = 4;
+}
+
+message EmendaParlamentar {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string codigo = 2;
+  optional string numero = 3;
+  optional int64 ano = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+message Autoria {
+  optional uint64 emenda_id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.amendment.TipoAutoria tipo_autoria = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 mandato_id = 3;
+  optional string nome_autor = 4;
+}
+
+message Recurso {
+  optional uint64 emenda_id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string codigo_local = 2;
+  optional string codigo_funcao = 3;
+  optional string codigo_subfuncao = 4;
+  optional string codigo_programa = 5;
+  optional string codigo_acao = 6;
+  optional string codigo_plano_orcamentario = 7;
+  optional string nome_plano_orcamentario = 8;
+  avoar.core.opendata.common.Decimal valor_empenhado = 9;
+  avoar.core.opendata.common.Decimal valor_liquidado = 10;
+  avoar.core.opendata.common.Decimal valor_pago = 11;
+  avoar.core.opendata.common.Decimal rap_registrado = 12;
+  avoar.core.opendata.common.Decimal rap_cancelado = 13;
+  avoar.core.opendata.common.Decimal rap_pago = 14;
+}
+
+message AmendmentItem {
+  optional string id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string value = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.amendment.TipoItem type = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+message Convenio {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string numero = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_publicacao = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string convenente = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string objeto = 5;
+  avoar.core.opendata.common.Decimal valor = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+}

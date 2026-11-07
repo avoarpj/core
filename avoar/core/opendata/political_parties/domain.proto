@@ -1,0 +1,47 @@
+// Basic data contracts for political_parties; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.political_parties;
+
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+enum AbrangenciaDiretorio {
+  ABRANGENCIA_DIRETORIO_UNSPECIFIED = 0;
+  ABRANGENCIA_DIRETORIO_MUNICIPAL = 1 [(avoar.core.opendata.common.source_value) = "municipal"];
+  ABRANGENCIA_DIRETORIO_ESTADUAL = 2 [(avoar.core.opendata.common.source_value) = "estadual"];
+  ABRANGENCIA_DIRETORIO_NACIONAL = 3 [(avoar.core.opendata.common.source_value) = "nacional"];
+  ABRANGENCIA_DIRETORIO_REGIONAL = 4 [(avoar.core.opendata.common.source_value) = "regional"];
+  ABRANGENCIA_DIRETORIO_ZONAL = 5 [(avoar.core.opendata.common.source_value) = "zonal"];
+}
+
+enum TipoDiretorio {
+  TIPO_DIRETORIO_UNSPECIFIED = 0;
+  TIPO_DIRETORIO_ORGAO_DEFINITIVO = 1 [(avoar.core.opendata.common.source_value) = "orgão definitivo"];
+  TIPO_DIRETORIO_COMISSAO_EXECUTIVA = 2 [(avoar.core.opendata.common.source_value) = "comissão executiva"];
+  TIPO_DIRETORIO_COMISSAO_INTERVENTORA = 3 [(avoar.core.opendata.common.source_value) = "comissão interventora"];
+  TIPO_DIRETORIO_ORGAO_PROVISORIO = 4 [(avoar.core.opendata.common.source_value) = "orgão provisório"];
+}
+
+message PartidoPolitico {
+  optional string nome = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string sigla = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  repeated string notas = 3;
+}
+
+message DiretorioPartidoPolitico {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string sigla_partido = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp inicio_vigencia = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp fim_vigencia = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.political_parties.AbrangenciaDiretorio abrangencia = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string uf = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string municipio = 7 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string codigo_ibge_municipio = 8;
+  optional string endereco = 9 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string cep = 10 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string zona_eleitoral = 11 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.political_parties.TipoDiretorio tipo_diretorio = 12 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 sequencial_tse = 13 [(avoar.core.opendata.common.rules) = { required: true }];
+}

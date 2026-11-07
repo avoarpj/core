@@ -1,0 +1,45 @@
+// Basic data contracts for election; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.election;
+
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+enum CargoEleicao {
+  CARGO_ELEICAO_UNSPECIFIED = 0;
+  CARGO_ELEICAO_PRESIDENTE = 1;
+  CARGO_ELEICAO_VICE_PRESIDENTE = 2;
+  CARGO_ELEICAO_SENADOR = 3;
+  CARGO_ELEICAO_GOVERNADOR = 4;
+  CARGO_ELEICAO_DEPUTADO_FEDERAL = 5;
+  CARGO_ELEICAO_DEPUTADO_ESTADUAL = 6;
+  CARGO_ELEICAO_VEREADOR = 7;
+  CARGO_ELEICAO_CONSELHEIRO_DISTRITAL = 8;
+}
+
+enum TipoEleicao {
+  TIPO_ELEICAO_UNSPECIFIED = 0;
+  TIPO_ELEICAO_ORDINARIA = 1;
+  TIPO_ELEICAO_SUPLEMENTAR = 2;
+}
+
+message Eleicao {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 pleito_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 ano = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string codigo_local = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string orgao_id = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 legislatura_id = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.election.TipoEleicao tipo = 7 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.election.CargoEleicao cargo = 8 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+message TurnoEleicao {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 eleicao_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_turno = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 numero_turno = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 codigo_tse = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+}

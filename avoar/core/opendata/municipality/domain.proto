@@ -1,0 +1,17 @@
+// Basic data contracts for municipality; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.municipality;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+
+message Municipio {
+  optional string codigo_ibge = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome_normalizado = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string uf = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Decimal latitude = 5 [(avoar.core.opendata.common.rules) = { required: true minimum: "-90.0" maximum: "90.0" }];
+  avoar.core.opendata.common.Decimal longitude = 6 [(avoar.core.opendata.common.rules) = { required: true minimum: "-180.0" maximum: "180.0" }];
+}

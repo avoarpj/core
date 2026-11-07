@@ -1,0 +1,16 @@
+// Basic data contracts for pleito; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.pleito;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+import "avoar/core/opendata/election/domain.proto";
+
+message Pleito {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 ano = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.election.TipoEleicao tipo = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Date data_inicio = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+}

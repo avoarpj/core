@@ -1,0 +1,24 @@
+// Basic data contracts for public_people; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.public_people;
+
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+message PessoaPublica {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome_completo = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string genero = 4 [(avoar.core.opendata.common.rules) = { allowed_values: "M" allowed_values: "F" }];
+  google.protobuf.Timestamp data_nascimento = 5;
+  optional string uf_nascimento = 6;
+}
+
+message IdentificadorPessoaPublica {
+  optional string identificador = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string tipo_identificador = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string fonte = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 pessoa_publica_id = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+}

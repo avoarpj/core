@@ -1,0 +1,12 @@
+// Basic data contracts for organ; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.organ;
+
+import "avoar/core/opendata/common/options.proto";
+
+message Orgao {
+  optional string id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+}

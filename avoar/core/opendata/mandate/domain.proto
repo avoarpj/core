@@ -1,0 +1,76 @@
+// Basic data contracts for mandate; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.mandate;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+message Mandato {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 pessoa_publica_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 legislatura_id = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string orgao_id = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 candidatura_id = 5;
+}
+
+message ExercicioMandato {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 mandato_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_inicio = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_fim = 4;
+}
+
+message FiliacaoExercicioMandato {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string sigla_partido = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 exercicio_id = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_associacao = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_desassociacao = 5;
+}
+
+enum TipoObjetoMandato {
+  TIPO_OBJETO_MANDATO_UNSPECIFIED = 0;
+  TIPO_OBJETO_MANDATO_INICIO_EXERCICIO = 1;
+  TIPO_OBJETO_MANDATO_ALTERACAO = 2;
+  TIPO_OBJETO_MANDATO_FIM_EXERCICIO = 3;
+  TIPO_OBJETO_MANDATO_AFASTAMENTO_COM_PRAZO = 4;
+  TIPO_OBJETO_MANDATO_AFASTAMENTO_SEM_PRAZO = 5;
+  TIPO_OBJETO_MANDATO_AFASTAMENTO_DEFINITIVO = 6;
+  TIPO_OBJETO_MANDATO_POSSE_TITULAR = 7;
+  TIPO_OBJETO_MANDATO_REASSUNCAO_MANDATO = 8;
+  TIPO_OBJETO_MANDATO_POSSE_SUPLENTE = 9;
+  TIPO_OBJETO_MANDATO_CARGO_EXECUTIVO = 10;
+  TIPO_OBJETO_MANDATO_CARGO_LEGISLATIVO = 11;
+  TIPO_OBJETO_MANDATO_LICENCA = 12;
+  TIPO_OBJETO_MANDATO_LICENCA_CONJUNTA = 13;
+  TIPO_OBJETO_MANDATO_TERMINO_LEGISLATURA = 14;
+  TIPO_OBJETO_MANDATO_RENUNCIA = 15;
+  TIPO_OBJETO_MANDATO_APOSENTADORIA = 16;
+  TIPO_OBJETO_MANDATO_CASSACAO_MANDATO = 17;
+  TIPO_OBJETO_MANDATO_SUSPENSAO_MANDATO = 18;
+  TIPO_OBJETO_MANDATO_FALECIMENTO = 19;
+  TIPO_OBJETO_MANDATO_ALTERACAO_PARTIDO = 20;
+  TIPO_OBJETO_MANDATO_ALTERACAO_NOME_PARLAMENTAR = 21;
+  TIPO_OBJETO_MANDATO_DIVERSO = 100;
+}
+
+message EventoMandato {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 mandato_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.mandate.TipoObjetoMandato tipo_evento = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.mandate.TipoObjetoMandato contexto = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.mandate.TipoObjetoMandato subcontexto = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string descricao = 6;
+  google.protobuf.Timestamp data_relacionada = 7 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+message GabineteMandato {
+  avoar.core.opendata.common.StringList telefones = 1;
+  optional string numero_gabinete = 2;
+  optional string anexo_gabinete = 3;
+  optional string email = 4;
+  optional uint64 mandato_id = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+}

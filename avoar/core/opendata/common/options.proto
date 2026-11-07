@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package avoar.core.opendata.common;
+
+import "google/protobuf/descriptor.proto";
+
+// Language-neutral constraints. Consumers must explicitly invoke validation.
+message FieldRules {
+  bool required = 1;
+  optional string minimum = 2;
+  optional string maximum = 3;
+  repeated string allowed_values = 4;
+}
+
+extend google.protobuf.FieldOptions {
+  FieldRules rules = 50000;
+}
+
+// Original text for enums migrated from Python string enums.
+extend google.protobuf.EnumValueOptions {
+  string source_value = 50001;
+}

@@ -1,0 +1,31 @@
+// Basic data contracts for voting_location; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.voting_location;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+message LocalVotacao {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string uf = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string codigo_municipio_tse = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string codigo_municipio_ibge = 4;
+  optional string zona_eleitoral = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string numero = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome = 7;
+  optional string endereco = 8;
+  optional string bairro = 9;
+  optional string cep = 10;
+  optional uint64 endereco_cluster_id = 11;
+  optional double latitude_tse = 12 [(avoar.core.opendata.common.rules) = { minimum: "-90" maximum: "90" }];
+  optional double longitude_tse = 13 [(avoar.core.opendata.common.rules) = { minimum: "-180" maximum: "180" }];
+  optional int64 codigo_situacao = 14;
+  repeated string campos_divergentes = 15;
+  optional int64 ano_referencia = 16 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Date data_eleicao = 17 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 numero_turno = 18 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp data_geracao = 19;
+}

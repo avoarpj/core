@@ -1,0 +1,18 @@
+// Basic data contracts for candidature; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.candidature;
+
+import "avoar/core/opendata/common/options.proto";
+
+message Candidatura {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 eleicao_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 pessoa_publica_id = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 numero_candidato = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string codigo_local = 5 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 codigo_cargo_tse = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string sigla_partido = 7 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 numero_partido = 8 [(avoar.core.opendata.common.rules) = { required: true }];
+}

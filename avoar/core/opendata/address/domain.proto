@@ -1,0 +1,94 @@
+// Basic data contracts for address; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.address;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+
+enum NivelGeoCodificacao {
+  NIVEL_GEO_CODIFICACAO_UNSPECIFIED = 0;
+  NIVEL_GEO_CODIFICACAO_ORIGINAL = 1;
+  NIVEL_GEO_CODIFICACAO_MODIFICADA = 2;
+  NIVEL_GEO_CODIFICACAO_ESTIMADA = 3;
+  NIVEL_GEO_CODIFICACAO_FACE_QUADRA = 4;
+  NIVEL_GEO_CODIFICACAO_LOCALIDADE = 5;
+  NIVEL_GEO_CODIFICACAO_SETOR_CENSITARIO = 6;
+}
+
+enum EspecieEndereco {
+  ESPECIE_ENDERECO_UNSPECIFIED = 0;
+  ESPECIE_ENDERECO_PARTICULAR = 1;
+  ESPECIE_ENDERECO_COLETIVO = 2;
+  ESPECIE_ENDERECO_AGROPECUARIO = 3;
+  ESPECIE_ENDERECO_ENSINO = 4;
+  ESPECIE_ENDERECO_SAUDE = 5;
+  ESPECIE_ENDERECO_OUTRAS_FINALIDADES = 6;
+  ESPECIE_ENDERECO_EM_CONSTRUCAO = 7;
+  ESPECIE_ENDERECO_RELIGIOSO = 8;
+}
+
+enum IndicadorQuantitativoEstabelecimento {
+  INDICADOR_QUANTITATIVO_ESTABELECIMENTO_UNSPECIFIED = 0;
+  INDICADOR_QUANTITATIVO_ESTABELECIMENTO_UNICO = 1;
+  INDICADOR_QUANTITATIVO_ESTABELECIMENTO_MULTIPLO = 2;
+}
+
+enum SubIndicadorQuantitativoEstabelecimento {
+  SUB_INDICADOR_QUANTITATIVO_ESTABELECIMENTO_UNSPECIFIED = 0;
+  SUB_INDICADOR_QUANTITATIVO_ESTABELECIMENTO_MENOR = 1; // 10 ou menos unidades
+  SUB_INDICADOR_QUANTITATIVO_ESTABELECIMENTO_MAIOR = 2; // mais de 10 unidades
+  SUB_INDICADOR_QUANTITATIVO_ESTABELECIMENTO_DESCONHECIDO = 3;
+}
+
+enum FinalidadeConstrucao {
+  FINALIDADE_CONSTRUCAO_UNSPECIFIED = 0;
+  FINALIDADE_CONSTRUCAO_RESIDENCIAL = 1;
+  FINALIDADE_CONSTRUCAO_NAO_RESIDENCIAL = 2;
+  FINALIDADE_CONSTRUCAO_MISTO = 3;
+  FINALIDADE_CONSTRUCAO_INDETERMINADO = 4;
+}
+
+enum EspecieDomicilio {
+  ESPECIE_DOMICILIO_UNSPECIFIED = 0;
+  ESPECIE_DOMICILIO_CASA = 1;
+  ESPECIE_DOMICILIO_CASA_VILA_CONDOMINIO = 2;
+  ESPECIE_DOMICILIO_APARTAMENTO = 3;
+  ESPECIE_DOMICILIO_OUTROS = 4;
+}
+
+message Endereco {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 cluster_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string municipio = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string distrito = 4;
+  optional string subdistrito = 5;
+  optional string setor = 6;
+  optional string quadra = 7;
+  optional string face = 8;
+  optional string cep = 9 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string descricao_localidade = 10;
+  optional string tipo_logradouro = 11 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string titulo_logradouro = 12 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome_logradouro = 13 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string numero_logradouro = 14;
+  optional string descricao_modificador = 15;
+  avoar.core.opendata.common.Decimal latitude = 16 [(avoar.core.opendata.common.rules) = { required: true minimum: "-90.0" maximum: "90.0" }];
+  avoar.core.opendata.common.Decimal longitude = 17 [(avoar.core.opendata.common.rules) = { required: true minimum: "-90.0" maximum: "90.0" }];
+  optional avoar.core.opendata.address.NivelGeoCodificacao nivel_geocodificacao = 18 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.address.EspecieEndereco especie = 19 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string identificacao_estabelecimento = 20;
+  optional avoar.core.opendata.address.IndicadorQuantitativoEstabelecimento indicador_quantitativo = 21 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.address.SubIndicadorQuantitativoEstabelecimento subindicador_quantitativo = 22 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.address.IndicadorQuantitativoEstabelecimento indicador_quantitativo_construcao = 23 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.address.SubIndicadorQuantitativoEstabelecimento subindicador_quantitativo_construcao = 24 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.address.FinalidadeConstrucao finalidade_construcao = 25 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.address.EspecieDomicilio especie_domicilio = 26 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+message EnderecoComplemento {
+  optional uint64 endereco_id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string valor = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+}

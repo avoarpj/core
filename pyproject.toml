@@ -1,0 +1,40 @@
+[project]
+name = "avoar-core"
+version = "0.1.0"
+description = "Core aberto do Avoar: modelos e docs."
+readme = "README.md"
+authors = [
+    { name = "Victor Reis David", email = "65618679+Victoreisdavid@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "protobuf>=7.36.2,<8",
+]
+
+[build-system]
+requires = ["hatchling==1.33.0", "grpcio-tools==1.85.1"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["hatchling==1.33.0", "grpcio-tools==1.85.1"]
+
+[tool.hatch.build.hooks.custom]
+path = "hatch_build.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["avoar"]
+
+[tool.hatch.build.targets.sdist]
+include = ["/avoar", "/scripts/generate_python.py", "/hatch_build.py", "/tests", "/README.md", "/LICENSE"]
+
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "hatch_build.py" },
+    { file = "scripts/generate_python.py" },
+    { file = "avoar/**/*.proto" },
+    { file = "avoar/core/__init__.py" },
+    { file = "avoar/core/validation.py" },
+    { file = "avoar/core/common/*.py" },
+    { file = "avoar/core/opendata/common/identity.py" },
+]

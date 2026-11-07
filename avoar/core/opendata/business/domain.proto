@@ -1,0 +1,90 @@
+// Basic data contracts for business; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.business;
+
+import "avoar/core/opendata/common/domain.proto";
+import "avoar/core/opendata/common/options.proto";
+
+message Empresa {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string base_cnpj = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string razao_social = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 natureza_juridica = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 qualificacao_responsavel = 5 [(avoar.core.opendata.common.rules) = { required: true }]; // qualificacao do responsavel
+  avoar.core.opendata.common.Decimal capital_social = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 porte = 7;
+  optional string ente_federativo = 8;
+}
+
+enum TipoEstabelecimento {
+  TIPO_ESTABELECIMENTO_UNSPECIFIED = 0;
+  TIPO_ESTABELECIMENTO_MATRIZ = 1; // Matriz
+  TIPO_ESTABELECIMENTO_FILIAL = 2; // Filial
+}
+
+enum SituacaoCadastral {
+  SITUACAO_CADASTRAL_UNSPECIFIED = 0;
+  SITUACAO_CADASTRAL_NULO = 1;
+  SITUACAO_CADASTRAL_ATIVO = 2;
+  SITUACAO_CADASTRAL_SUSPENSO = 3;
+  SITUACAO_CADASTRAL_INAPTO = 4;
+  SITUACAO_CADASTRAL_BAIXADO = 5;
+}
+
+enum TipoSocio {
+  TIPO_SOCIO_UNSPECIFIED = 0;
+  TIPO_SOCIO_PESSOA_JURIDICA = 1;
+  TIPO_SOCIO_PESSOA_FISICA = 2;
+  TIPO_SOCIO_ESTRANGEIRO = 3;
+}
+
+message Estabelecimento {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 empresa_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string cnpj = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional avoar.core.opendata.business.TipoEstabelecimento tipo = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome_fantasia = 5;
+  optional avoar.core.opendata.business.SituacaoCadastral situacao_cadastral = 6 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Date data_situacao_cadastral = 7;
+  optional int64 motivo_situacao_cadastral = 8 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string cidade_exterior = 9;
+  optional string codigo_pais = 10;
+  avoar.core.opendata.common.Date data_inicio_atividade = 11;
+  repeated string cnaes = 12;
+  optional string endereco_tipo_logradouro = 13;
+  optional string endereco_logradouro = 14;
+  optional string endereco_numero = 15;
+  optional string endereco_complemento = 16;
+  optional string endereco_bairro = 17;
+  optional string endereco_cep = 18;
+  optional string endereco_uf = 19 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string endereco_municipio = 20 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 endereco_cluster_id = 21 [(avoar.core.opendata.common.rules) = { required: true }];
+  repeated string telefones = 22;
+  optional string fax = 23;
+  optional string email = 24;
+  optional string situacao_especial = 25;
+  avoar.core.opendata.common.Date data_situacao_especial = 26;
+}
+
+message Socio {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string documento = 3;
+  optional int64 faixa_etaria = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+}
+
+message SociedadeParticipacao {
+  optional uint64 empresa_id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 socio_id = 2; // referencia socio ou empresa, depende de tipo_socio
+  optional avoar.core.opendata.business.TipoSocio tipo_socio = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional int64 qualificacao = 4 [(avoar.core.opendata.common.rules) = { required: true }];
+  avoar.core.opendata.common.Date data_entrada = 5;
+  optional string nome_socio = 6;
+  optional string documento_socio = 7;
+  optional string nome_representante_legal = 8;
+  optional string documento_representante_legal = 9;
+  optional int64 qualificacao_representante_legal = 10;
+}

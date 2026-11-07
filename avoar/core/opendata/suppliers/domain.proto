@@ -1,0 +1,32 @@
+// Basic data contracts for suppliers; independent of API responses.
+// Field numbers are stable: reserve removed numbers and names; never renumber.
+syntax = "proto3";
+
+package avoar.core.opendata.suppliers;
+
+import "avoar/core/opendata/common/options.proto";
+import "google/protobuf/timestamp.proto";
+
+enum TipoDocumentoFornecedor {
+  TIPO_DOCUMENTO_FORNECEDOR_DESCONHECIDO = 0;
+  TIPO_DOCUMENTO_FORNECEDOR_CNPJ = 1;
+  TIPO_DOCUMENTO_FORNECEDOR_CPF = 2;
+  TIPO_DOCUMENTO_FORNECEDOR_INSCRICAO_GENERICA = 3; // inscrição genérica (emenda parlamentar)
+  TIPO_DOCUMENTO_FORNECEDOR_UNIDADE_GESTORA = 4; // unidade gestora (emenda parlamentar)
+}
+
+message Fornecedor {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string documento = 2;
+  optional avoar.core.opendata.suppliers.TipoDocumentoFornecedor tipo_documento = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  google.protobuf.Timestamp criado_em = 4;
+}
+
+message NomeFornecedor {
+  optional uint64 id = 1 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional uint64 fornecedor_id = 2 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string nome = 3 [(avoar.core.opendata.common.rules) = { required: true }];
+  optional string coletado_de_orgao_id = 4;
+  optional string coletado_de_fonte_bruta = 5;
+  google.protobuf.Timestamp coletado_em = 6;
+}
